@@ -12,6 +12,7 @@ import Vapor
 enum ChainError: Error {
     case unauthorized
     case invalid
+    case mismatchingIdentifier
 }
 
 struct ChainGate: Middleware {
@@ -142,6 +143,9 @@ extension Request {
         let identifier = try filterChain()
         let newLog = try content.decode(DataLog.self)
         return try findChain()
+            .guard({ chain in
+                chain.identifier == newLog.identifier
+            }, else: ChainError.mismatchingIdentifier)
             .tryFlatMap({ chain in
                 let model = DataModel(identifier: identifier,
                                       version: newLog.version,

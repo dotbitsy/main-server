@@ -17,7 +17,7 @@ struct BlockChainNode: Content, Hashable {
 }
 
 struct PreFixer {
-    static let prefix = "ABC"
+    static let prefix = "817"
 }
 
 extension Digest {

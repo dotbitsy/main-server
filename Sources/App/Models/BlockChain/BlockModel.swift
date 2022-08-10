@@ -96,8 +96,7 @@ final class BlockModel: Content, Model {
         encoder.outputFormatting = [.sortedKeys]
         let encoded = dataModels.map({
             dmdl -> DataLog in
-            let x = dmdl.logKey
-            return x
+            return dmdl.logKey
         })
         guard
             let c = try? encoder.encode(encoded)
