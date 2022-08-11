@@ -9,6 +9,11 @@ func routes(_ app: Application) throws {
     app.get("hello") { req -> String in
         return "Hello, world!"
     }
+    
+    let bitsys = BitSystem(eventloop: app.eventLoopGroup.next())
+    app.webSocket("bitsys") { req, ws async in
+        await bitsys.connect(ws: ws)
+    }
 
     try app.register(collection: LicenseController())
     try app.register(collection: BlockChainController())

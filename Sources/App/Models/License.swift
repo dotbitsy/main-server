@@ -6,6 +6,7 @@
 //
 import Fluent
 import Vapor
+import FluentMongoDriver
 
 //id
 //type
