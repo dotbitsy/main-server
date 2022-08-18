@@ -30,8 +30,7 @@ actor ByteProcessing {
     func process(_ bit: Bit) -> ByteResult {
         bits.append(bit)
         switch bits.count {
-        case 1...7:
-            return .none
+        case 1...7: return .none
         case 8...:
             let byte = Byte(bits: bits)
             bits.removeAll()
@@ -45,11 +44,11 @@ actor ByteProcessing {
         switch byte.crushed.quant {
         case true:
             complexity += 1
-            return .none
+            return ByteResult.byte(byte)
         case false:
             output += byte.crushed
             guard output.count >= 8
-            else { return .none }
+            else { return ByteResult.byte(byte) }
             let result = ByteResult.seed(Seed(complexity: complexity, output: output, raw: raw))
             complexity = 0
             output = ""
