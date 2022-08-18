@@ -25,10 +25,10 @@ final class BitSystemClients: SocketClients<BitSystemClient> {
         case string(WebSocket, String)
     }
     
-    private(set) var bytes: [Bit]
+    private(set) var processing: ByteProcessing
     
     override init(eventloop: EventLoop, storage: [UUID : BitSystemClient] = [:]) {
-        bytes = []
+        processing = ByteProcessing()
         super.init(eventloop: eventloop, storage: storage)
     }
     
@@ -95,16 +95,14 @@ final class BitSystemClients: SocketClients<BitSystemClient> {
     }
     
     private func update(state: Bool, sender: UUID) async {
-        bytes.append(Bit(state: state))
-        switch bytes.count {
-        case 1...7: return
-        case 8...:
-            let data = SocketData(client: UUID(), data: Byte(bytes: bytes))
+        switch await processing.process(Bit(state: state)) {
+        case .none: return
+        case .byte(let byte):
+            let data = SocketData(client: UUID(), data: byte)
             await send(data: data)
-            print("><>˙ ", bytes.description)
-            bytes.removeAll()
-        default: fatalError("May not go beyond 8")
+        case .seed(let seed):
+            let data = SocketData(client: UUID(), data: seed)
+            await send(data: data)
         }
     }
-
 }

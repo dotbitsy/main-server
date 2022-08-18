@@ -72,7 +72,7 @@ function Chat(host) {
                 } else {
                     if ( obj.data.bytes !== undefined) {
                         console.log("Client Data: " + obj.client + ' : ' + obj.data.bytes.length);
-//                        chat.bubble("Machine", obj.data.bytes.length)
+                        chat.bubble("Machine Bytes", obj.data.bytes.length)
                     } else if ( obj.data.connect !== undefined) {
                         console.log("Client: " + obj.client + ' : ' + obj.data.connect);
                         chat.bubble("Machine", obj.data.connect)
@@ -80,7 +80,6 @@ function Chat(host) {
                         console.log("Client Data: " + obj.client + ' : ' + obj.data.data);
                         chat.bubble("Machine", obj.data.data)
                     }
-                   
                 }
             }
             console.log("Message received.");
