@@ -62,7 +62,7 @@ open class SocketClients<T: SocketClient> {
     }
     
     func send<T: Codable>(data: T) async {
-        await active.asyncForEach { try? await $0.send(data: data) }
+        await active.asyncForEach { try! await $0.send(data: data) }
     }
     
     deinit {
