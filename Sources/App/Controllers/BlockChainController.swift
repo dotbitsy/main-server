@@ -25,6 +25,7 @@ struct ChainGate: Middleware {
         return next.respond(to: request)
     }
 }
+
  
 struct BlockChainController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -66,8 +67,7 @@ struct BlockChainController: RouteCollection {
 extension Request {
     
     func filterChain() throws -> String {
-        guard
-            let license = parameters.get(BlockChainFields.identifier.rawValue.description)
+        guard let license = parameters.get(BlockChainFields.identifier.rawValue.description)
         else { throw Abort(.internalServerError, reason: "Request unexpectedly missing identifier parameter") }
         return license
     }
@@ -76,7 +76,6 @@ extension Request {
         BlockChain
             .query(on: db)
             .all()
-
     }
 
     func findChain() throws -> EventLoopFuture<BlockChain> {

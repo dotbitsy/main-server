@@ -41,7 +41,7 @@ struct LicenseController: RouteCollection {
         req.licenses()
     }
     
-    func indexOne(req: Request) throws -> EventLoopFuture<License> {
+    func indexOne(req: Request) throws -> EventLoopFuture<Response> {
         try req.findLicense()
     }
 
@@ -74,13 +74,17 @@ extension Request {
             .all()
     }
     
-    func findLicense() throws -> EventLoopFuture<License> {
+    func findLicense() throws -> EventLoopFuture<Response> {
         let identifier = try filterLicense()
         return License
             .query(on: db)
             .filter(\.$identifier == identifier)
             .first()
             .unwrap(or: Abort(.notFound, reason: "No license with matching id"))
+            .map({
+                Response(status: .created,
+                         body: .init(data: try! JSONEncoder().encode($0)))
+            })
     }
     
     func addLicense() throws -> EventLoopFuture<Response> {
