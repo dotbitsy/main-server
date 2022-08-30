@@ -12,11 +12,7 @@ func routes(_ app: Application) throws {
     try app.register(collection: BlockModelController())
     try app.register(collection: stats)
     
-    let bitsys = BitSystem(eventloop: app.eventLoopGroup.next())
-    app.webSocket("bitsys") { req, ws async in
-        await bitsys.connect(ws: ws)
-    }
-
+  
     app.get("hello") { req in
         return req.view.render("index", ["title": "Hello Vapor!"])
     }
@@ -27,5 +23,12 @@ func routes(_ app: Application) throws {
     
     app.get("hello") { req -> String in
         return "Hello, world!"
+    }
+    
+    let license = app.routes
+        .grouped(LicenseGate())
+    let bitsys = BitSystem(eventloop: app.eventLoopGroup.next())
+    license.webSocket("bitsys") { req, ws async in
+        await bitsys.connect(ws: ws)
     }
 }
