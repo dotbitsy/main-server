@@ -28,6 +28,12 @@ struct ChainGate: Middleware {
 
  
 struct BlockChainController: RouteCollection {
+    
+    private(set) var stats: StatsController
+    init(statsController: StatsController) {
+        stats = statsController
+    }
+    
     func boot(routes: RoutesBuilder) throws {
         let chain = routes
             .grouped(ChainGate())
@@ -39,8 +45,6 @@ struct BlockChainController: RouteCollection {
             route.post(use: add)
             route.delete(use: delete)
         }
-        
-        print("Router Set")
     }
 
     func index(req: Request) throws -> EventLoopFuture<[BlockChain]> {
@@ -52,11 +56,11 @@ struct BlockChainController: RouteCollection {
     }
 
     func create(req: Request) throws -> EventLoopFuture<Response> {
-        try req.addLicense()
+        try req.addLicense(stats: stats)
     }
     
     func add(req: Request) throws -> EventLoopFuture<Response> {
-        try req.addToChain()
+        try req.addToChain(stats: stats)
     }
     
     func delete(req: Request) throws -> EventLoopFuture<Response> {
@@ -138,7 +142,7 @@ extension Request {
             }
     }
 //
-    func addToChain() throws -> EventLoopFuture<Response> {
+    func addToChain(stats: StatsController) throws -> EventLoopFuture<Response> {
         let identifier = try filterChain()
         let newLog = try content.decode(DataLog.self)
         return try findChain()
@@ -154,6 +158,9 @@ extension Request {
                 return model.save(on: self.db)
                     .flatMap{ _ in
                         let block = chain.next(block: BlockModel(identifier: model.identifier, dataModels: [model]))
+                        block.dataModels.forEach({
+                            stats.add(value: $0.total)
+                        })
                         return block.save(on: self.db)
                             .tryFlatMap { _ in
                                 chain.add(block: block)
@@ -163,8 +170,7 @@ extension Request {
                                         chain.valid
                                     }, else: ChainError.invalid)
                                     .map { _ in
-                                        guard
-                                            let encoded = try? JSONEncoder().encode(block)
+                                        guard let encoded = try? JSONEncoder().encode(block)
                                         else  { return Response(status: .conflict) }
                                         return Response(status: .ok,
                                                         body: .init(data:  encoded))
@@ -176,7 +182,6 @@ extension Request {
             }).flatMapErrorThrowing{ error in
                 throw Abort(.conflict, reason: "Coudnl't find chains: \(error)")
             }
-        
     }
 //
     func deleteChain() throws -> EventLoopFuture<Response> {

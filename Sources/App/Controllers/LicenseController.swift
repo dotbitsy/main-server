@@ -27,7 +27,6 @@ struct LicenseController: RouteCollection {
             .grouped(LicenseGate())
             .grouped("license")
         license.get(use: index)
-        license.post(use: create)
         license.group(":identifier") { route in
             route.get(use: indexOne)
             route.delete(use: delete)
@@ -45,10 +44,6 @@ struct LicenseController: RouteCollection {
         try req.findLicense()
     }
 
-    func create(req: Request) throws -> EventLoopFuture<Response> {
-        try req.addLicense()
-    }
-    
     func patch(req: Request) throws -> EventLoopFuture<Response> {
         try req.updateLicense()
     }
@@ -87,7 +82,7 @@ extension Request {
             })
     }
     
-    func addLicense() throws -> EventLoopFuture<Response> {
+    func addLicense(stats: StatsController) throws -> EventLoopFuture<Response> {
         let newLicense = try content.decode(License.self)
         return try addChain(identifier: newLicense.identifier)
             .flatMap { _ in
@@ -96,6 +91,7 @@ extension Request {
                     .flatMapAlways({ result in
                         switch result {
                         case .success:
+                            stats.add(newChain: 1)
                             return self.eventLoop.makeSucceededFuture(Response(status: .created,
                                                                                body: .init(data: try! JSONEncoder().encode(newLicense))))
                         case .failure(let error):

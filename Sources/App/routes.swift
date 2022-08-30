@@ -19,8 +19,12 @@ func routes(_ app: Application) throws {
         await bitsys.connect(ws: ws)
     }
 
-     
+    
+    let chain = try BlockChain.query(on: app.db).all().wait()
+    let stats =  StatsController(chain: chain)
+    
     try app.register(collection: LicenseController())
-    try app.register(collection: BlockChainController())
+    try app.register(collection: BlockChainController(statsController: stats))
     try app.register(collection: BlockModelController())
+    try app.register(collection: stats)
 }

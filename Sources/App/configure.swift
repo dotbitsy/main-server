@@ -31,7 +31,6 @@ public func configure(_ app: Application) throws {
     try app.databases.use(.mongo(
         connectionString: Environment.get("DATABASE_URL") ?? "mongodb://127.0.0.1:27017/institute"
     ), as: .mongo)
-
     // try app.autoRevert().wait()
     app.migrations.add(CreateLicenseMigrator())
     app.migrations.add(CreateDataModelMigrator())
