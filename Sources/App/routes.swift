@@ -14,11 +14,11 @@ func routes(_ app: Application) throws {
     
   
     app.get("hello") { req in
-        return req.view.render("index", ["title": "Hello Vapor!"])
+        return req.view.render("index", ["title": "Hello Machine!", "value" : "\(stats.totalChainValue)"])
     }
     
     app.get { req async throws in
-        try await req.view.render("institute", ["title": "Total: \(stats.totalChainValue)"])
+        try await req.view.render("institute", ["title": "fr13n5", "value": "\(stats.totalChainValue)"])
     }
     
     app.get("hello") { req -> String in
