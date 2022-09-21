@@ -52,6 +52,8 @@ final class BitSystemClients: SocketClients<BitSystemClient> {
             await update(data: msg.data.data, client: msg.client)
         } else if let msg = buffer.decodeSocketData(type: Bit.self) {
             await update(state: msg.data.state, sender: msg.client)
+        } else if let msg = buffer.decodeSocketData(type: SystemData.self) {
+            await notify(data: msg.data.systematic, client: msg.client)
         } else if let msg = buffer.decodeSocketData(type: BitID.self) {
             guard let client = find(msg.client)
             else { return }
@@ -83,10 +85,15 @@ final class BitSystemClients: SocketClients<BitSystemClient> {
     }
     
     private func welcome(client: BitSystemClient) async {
-        let data = SocketData(client: UUID(), data: BitData(data: "Welcome: " + client.name))
+        let data = SocketData(client: UUID(), data: SystemData(systematic: "Welcome: " + client.name))
         try? await client.send(data: data)
-        let datas = SocketData(client: UUID(), data: BitData(data: "Everybody welcome: " + client.name))
+        let datas = SocketData(client: UUID(), data: SystemData(systematic: "Everybody Welcome: " + client.name))
         await send(data: datas)
+    }
+    
+    private func notify(data: String, client: UUID) async {
+        let data = SocketData(client: client, data: SystemData(systematic: data))
+        await send(data: data)
     }
     
     private func update(data: String, client: UUID) async {

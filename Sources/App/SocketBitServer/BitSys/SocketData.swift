@@ -62,6 +62,10 @@ struct BitData: Codable {
     let data: String
 }
 
+struct SystemData: Codable {
+    let systematic: String
+}
+
 struct Bit: Codable {
     let state: Bool
 }
